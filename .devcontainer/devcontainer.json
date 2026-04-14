@@ -1,0 +1,32 @@
+{
+  "name": "FIAP Lab",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",  
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "aws-scripting-guy.cform",
+        "hashicorp.terraform",
+        "github.copilot",
+        "redhat.vscode-yaml",
+        "fradolph.serverless-snippets"
+      ]
+    }
+  },
+  "postCreateCommand": "chmod +x /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/.devcontainer/script.sh && bash /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/.devcontainer/script.sh",
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  }
+}
