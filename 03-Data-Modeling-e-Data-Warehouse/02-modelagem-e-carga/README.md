@@ -773,7 +773,18 @@ Dim_data é a primeira coisa que se monta em um warehouse serio. Ela costuma ter
 
 ### Fallback com CTE recursiva
 
-Se `stl_plan_info` estiver vazia (pode acontecer em cluster recém-criado), use a versão com `WITH RECURSIVE serie(dt) AS ... ` — documentada como comentário no arquivo `sql/b_star_scd1/02_dim_data.sql`.
+Se `stl_plan_info` estiver vazia (pode acontecer em cluster recém-criado), substitua o bloco `WITH numeros AS ...` do passo 12 por uma CTE recursiva:
+
+```sql
+WITH RECURSIVE serie(dt) AS (
+    SELECT DATE '1992-01-01'
+    UNION ALL
+    SELECT dt + 1 FROM serie WHERE dt < DATE '1998-12-31'
+)
+SELECT ... FROM serie;
+```
+
+O restante das colunas do `INSERT` permanece igual.
 
 </blockquote>
 </details>
@@ -1452,9 +1463,10 @@ Ambas as perguntas são legítimas. Ambas aparecem em reuniões reais. A diferen
 > [!IMPORTANT]
 > O trabalho do engenheiro de dados não é escolher sozinho entre `N₁`, `N₂` e `N₃`. É tornar as duas perguntas **distinguíveis**, **conversáveis** e **auditáveis**. Uma modelagem bem feita permite expor as duas lado a lado, com nomes explícitos e contratos claros.
 
-28. Copie o template e preencha sua decisão:
+28. No terminal do Codespaces, copie o template e preencha sua decisão:
 
 ```bash
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/02-modelagem-e-carga
 cp DECISION_TEMPLATE.md DECISION.md
 ```
 
@@ -1542,4 +1554,4 @@ Deve cobrir 1992-01-01 a 1998-12-31.
 
 ### `stl_plan_info` vazia ao gerar `dim_data`
 
-Em cluster recém-criado, essa system table pode ter poucas linhas. Use o fallback com CTE recursiva documentado no arquivo `sql/b_star_scd1/02_dim_data.sql`.
+Em cluster recém-criado, essa system table pode ter poucas linhas. Use o fallback com CTE recursiva descrito no bloco "Fallback com CTE recursiva" do passo 12.

@@ -1029,6 +1029,7 @@ ls -la
 Opcional, mas boa prática. Liste os outputs para confirmar quais recursos serão removidos:
 
 ```bash
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
 terraform output
 ```
 
@@ -1042,6 +1043,7 @@ Você deve ver o `redshift_cluster_identifier`, `s3_bucket_name` e `glue_databas
 ### 31. Execute o destroy
 
 ```bash
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
 terraform destroy
 ```
 

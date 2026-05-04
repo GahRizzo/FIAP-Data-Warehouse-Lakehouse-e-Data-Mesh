@@ -382,41 +382,20 @@ O shell script `load_tpch.sh` é o único script — e só roda porque:
 │   └── scripts/
 │       └── load_tpch.sh               ← dataset ingestion (uma vez)
 ├── 02-modelagem-e-carga/                ← Lab 03.1 (três modelagens, três respostas)
-│   ├── README.md                       ← passo a passo narrativo
+│   ├── README.md                       ← passo a passo narrativo + todos os SQLs inline
 │   ├── DECISION_TEMPLATE.md            ← template p/ aluno documentar escolha
-│   └── sql/
-│       ├── a_oltp_mirror/
-│       │   ├── 01_create_schema.sql    ← schema oltp_mirror + 8 tabelas
-│       │   ├── 02_copy_tables.sql      ← COPY das 8 tabelas TPC-H
-│       │   └── 03_query_ancora.sql     ← query-âncora no modelo OLTP
-│       ├── b_star_scd1/
-│       │   ├── 01_create_schema.sql
-│       │   ├── 02_dim_data.sql         ← dim_data gerada por SQL
-│       │   ├── 03_dimensions.sql       ← dim_customer (SCD1), produto, geo, supplier
-│       │   ├── 04_fact.sql             ← f_vendas com distkey/sortkey + receita_liquida
-│       │   └── 05_query_ancora.sql
-│       └── c_star_scd2/
-│           ├── 01_create_schema.sql
-│           ├── 02_dim_customer_scd2.sql ← MERGE com customer_history
-│           ├── 03_fact.sql             ← aponta p/ versão vigente na data da venda
-│           └── 04_query_ancora.sql
+│   └── img/
+│       ├── arquitetura-03-1.drawio
+│       └── arquitetura-03-1.png
 └── 03-analise-dimensional/              ← Lab 03.2 (três evoluções do negócio)
-    ├── README.md                       ← passo a passo narrativo
-    └── sql/
-        ├── evolucao_1_nova_receita/
-        │   ├── 01_view_receita_v2.sql  ← nova fórmula com commission_rate
-        │   ├── 02_mv_receita_v2.sql    ← materialized view com AUTO REFRESH
-        │   └── 03_compara_v1_v2.sql    ← impacto nos números históricos
-        ├── evolucao_2_cliente_ativo/
-        │   ├── 01_opcao_scd2.sql       ← is_active como atributo SCD2
-        │   ├── 02_opcao_snapshot.sql   ← f_customer_status_mensal
-        │   └── 03_tradeoffs.sql        ← queries que diferenciam as duas abordagens
-        └── evolucao_3_sla_dashboard/
-            ├── 01_medir_baseline.sql   ← tempo atual com EXPLAIN ANALYZE
-            ├── 02_redistkey.sql        ← recria fato com DISTKEY(data_sk)
-            ├── 03_mv_dashboard.sql     ← MV pré-agregada
-            └── 04_medir_final.sql      ← comparação before/after
+    ├── README.md                       ← passo a passo narrativo + todos os SQLs inline
+    └── img/
+        ├── arquitetura-03-2.drawio
+        └── arquitetura-03-2.png
 ```
+
+> [!NOTE]
+> Os SQLs ficam **inline** nos READMEs, para o aluno copiar e colar no Redshift Query Editor v2. Esse é o mesmo padrão dos Labs 01 (Storage) e 02 (Open Table Format).
 
 ---
 

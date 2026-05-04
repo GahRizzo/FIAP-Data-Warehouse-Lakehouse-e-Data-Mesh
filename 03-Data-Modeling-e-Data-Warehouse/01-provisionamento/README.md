@@ -52,7 +52,7 @@ Se ambos funcionarem, prossiga.
 ### 1. Subir a infraestrutura
 
 ```bash
-cd 03-Data-Modeling-e-Data-Warehouse/01-provisionamento
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
 terraform init
 terraform apply
 ```
@@ -89,6 +89,7 @@ terraform output -raw redshift_master_password
 ### 2. Carregar o dataset TPC-H
 
 ```bash
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
 bash scripts/load_tpch.sh
 ```
 
@@ -129,8 +130,10 @@ Dois caminhos suportados. Escolha um:
 
 1. No console AWS, abra **Redshift → Query Editor v2**
 2. Clique no cluster `dw-aula3-<short_id>`
-3. **Database user and password** → use `dwadmin` e a senha de:
+3. **Database user and password** → use `dwadmin` e a senha de (executar no terminal do Codespaces):
+
    ```bash
+   cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
    terraform output -raw redshift_master_password
    ```
 4. Database: `dw_mba`
@@ -138,6 +141,7 @@ Dois caminhos suportados. Escolha um:
 #### Caminho B — psql no Codespaces
 
 ```bash
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
 PGPASSWORD="$(terraform output -raw redshift_master_password)" \
   psql -h "$(terraform output -raw redshift_host)" \
        -p 5439 \
@@ -154,7 +158,7 @@ SELECT current_user, current_database(), version();
 ### 4. Prossiga para o Lab 03.1
 
 ```bash
-cd ../02-modelagem-e-carga
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/02-modelagem-e-carga
 cat README.md
 ```
 
@@ -165,6 +169,7 @@ cat README.md
 Se a aula tem intervalo longo, **pause o cluster** em vez de deletar. Isso preserva dados e schemas, mas zera o custo de computação.
 
 ```bash
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
 aws redshift pause-cluster \
   --cluster-identifier "$(terraform output -raw redshift_cluster_identifier)"
 ```
@@ -172,6 +177,7 @@ aws redshift pause-cluster \
 Para retomar:
 
 ```bash
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
 aws redshift resume-cluster \
   --cluster-identifier "$(terraform output -raw redshift_cluster_identifier)"
 ```
@@ -184,7 +190,7 @@ aws redshift resume-cluster \
 ## Ao final da aula: destruir tudo
 
 ```bash
-cd 03-Data-Modeling-e-Data-Warehouse/01-provisionamento
+cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/01-provisionamento
 terraform destroy
 ```
 
