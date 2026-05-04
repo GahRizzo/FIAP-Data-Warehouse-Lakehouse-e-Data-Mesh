@@ -69,7 +69,7 @@
         <mxCell id="cs-card" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4D7DB;arcSize=6;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="60" y="210" width="260" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="cs-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#232F3E;strokeColor=#232F3E;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloud9;" vertex="1" parent="1">
+        <mxCell id="cs-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#232F3E;strokeColor=#FFFFFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloud9;" vertex="1" parent="1">
           <mxGeometry x="141" y="228" width="48" height="48" as="geometry" />
         </mxCell>
         <mxCell id="cs-name" value="GitHub Codespaces" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Helvetica;fontColor=#232F3E;" vertex="1" parent="1">
@@ -85,7 +85,7 @@
         <mxCell id="tf-card" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4D7DB;arcSize=6;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="340" y="210" width="260" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="tf-icon" value="" style="sketch=0;shape=mxgraph.terraform;html=1;fillColor=#7B42BC;strokeColor=#7B42BC;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;" vertex="1" parent="1">
+        <mxCell id="tf-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#7B42BC;strokeColor=#FFFFFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.command_line_interface;" vertex="1" parent="1">
           <mxGeometry x="446" y="226" width="48" height="55" as="geometry" />
         </mxCell>
         <mxCell id="tf-name" value="Terraform apply" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Helvetica;fontColor=#232F3E;" vertex="1" parent="1">
@@ -105,7 +105,7 @@
         <mxCell id="s3-card" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4D7DB;arcSize=6;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="640" y="240" width="200" height="180" as="geometry" />
         </mxCell>
-        <mxCell id="s3-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#7AA116;strokeColor=#7AA116;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" vertex="1" parent="1">
+        <mxCell id="s3-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#7AA116;strokeColor=#FFFFFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" vertex="1" parent="1">
           <mxGeometry x="716" y="256" width="48" height="48" as="geometry" />
         </mxCell>
         <mxCell id="s3-name" value="Amazon S3" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Helvetica;fontColor=#232F3E;" vertex="1" parent="1">
@@ -124,7 +124,7 @@
         <mxCell id="glue-card" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4D7DB;arcSize=6;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="860" y="240" width="200" height="180" as="geometry" />
         </mxCell>
-        <mxCell id="glue-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#8C4FFF;strokeColor=#8C4FFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.glue;" vertex="1" parent="1">
+        <mxCell id="glue-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#8C4FFF;strokeColor=#FFFFFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.glue;" vertex="1" parent="1">
           <mxGeometry x="936" y="256" width="48" height="48" as="geometry" />
         </mxCell>
         <mxCell id="glue-name" value="AWS Glue Catalog" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Helvetica;fontColor=#232F3E;" vertex="1" parent="1">
@@ -143,7 +143,7 @@
         <mxCell id="rs-card" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4D7DB;arcSize=6;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="1080" y="240" width="200" height="180" as="geometry" />
         </mxCell>
-        <mxCell id="rs-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#3334B9;strokeColor=#3334B9;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.redshift;" vertex="1" parent="1">
+        <mxCell id="rs-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#3334B9;strokeColor=#FFFFFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.redshift;" vertex="1" parent="1">
           <mxGeometry x="1156" y="256" width="48" height="48" as="geometry" />
         </mxCell>
         <mxCell id="rs-name" value="Amazon Redshift" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Helvetica;fontColor=#232F3E;" vertex="1" parent="1">
@@ -166,7 +166,7 @@
         <mxCell id="qe-card" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4D7DB;arcSize=6;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="1320" y="210" width="230" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="qe-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#E7157B;strokeColor=#E7157B;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.management_console;" vertex="1" parent="1">
+        <mxCell id="qe-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#E7157B;strokeColor=#FFFFFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.management_console;" vertex="1" parent="1">
           <mxGeometry x="1411" y="228" width="48" height="48" as="geometry" />
         </mxCell>
         <mxCell id="qe-name" value="Query Editor v2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Helvetica;fontColor=#232F3E;" vertex="1" parent="1">
@@ -186,7 +186,7 @@
         <mxCell id="tpch-public" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4D7DB;arcSize=6;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="60" y="540" width="260" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="tpch-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#687078;strokeColor=#687078;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" vertex="1" parent="1">
+        <mxCell id="tpch-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#687078;strokeColor=#FFFFFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" vertex="1" parent="1">
           <mxGeometry x="141" y="556" width="48" height="48" as="geometry" />
         </mxCell>
         <mxCell id="tpch-name" value="TPC-H SF1 público" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Helvetica;fontColor=#232F3E;" vertex="1" parent="1">

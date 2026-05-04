@@ -57,7 +57,7 @@
         <mxCell id="base-card" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#146EB4;arcSize=6;shadow=1;strokeWidth=2;" vertex="1" parent="1">
           <mxGeometry x="60" y="150" width="280" height="750" as="geometry" />
         </mxCell>
-        <mxCell id="base-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#3334B9;strokeColor=#3334B9;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.redshift;" vertex="1" parent="1">
+        <mxCell id="base-icon" value="" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#3334B9;strokeColor=#FFFFFF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.redshift;" vertex="1" parent="1">
           <mxGeometry x="176" y="170" width="48" height="48" as="geometry" />
         </mxCell>
         <mxCell id="base-name" value="dw_star no Redshift" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontFamily=Helvetica;fontColor=#232F3E;" vertex="1" parent="1">
