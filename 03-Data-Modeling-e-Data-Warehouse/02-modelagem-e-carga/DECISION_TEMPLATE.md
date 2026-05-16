@@ -2,7 +2,7 @@
 
 > Documento entregue à diretora financeira **Marina** da TPCH Trading antes da reunião do conselho. Simula um ADR (Architecture Decision Record) real — documento curto que registra uma escolha técnica com contexto, alternativas e consequências.
 >
-> **Como usar**: copie este arquivo para `DECISION.md` na mesma pasta e preencha enquanto avança no Lab 03.1. Os campos `N₁`, `N₂`, `N₃` são preenchidos ao final de cada Parte 2, 3, 4. A justificativa final é escrita na Parte 5.
+> **Como usar**: copie este arquivo para `DECISION.md` na mesma pasta e preencha enquanto avança no Lab 03.2. Os campos `N₁`, `N₂`, `N₃` são preenchidos ao final de cada Parte 2, 3, 4. A justificativa final é escrita na Parte 5.
 
 ---
 

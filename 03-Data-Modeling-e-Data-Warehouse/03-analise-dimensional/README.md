@@ -1,6 +1,6 @@
-# 03.2 - Evolução do negócio: quando a modelagem tem que mudar
+# 03.3 - Evolução do negócio: quando a modelagem tem que mudar
 
-> **6 meses depois do Lab 03.1.**
+> **6 meses depois do Lab 03.2.**
 >
 > O `DECISION.md` que escrevemos juntos foi aprovado. O DW da TPCH Trading entrou em produção. Por 4 meses, ninguém liga para o engenheiro de dados — sinal verde. Aí, num único trimestre, **três pessoas batem na sua porta**:
 >
@@ -12,13 +12,13 @@
 >
 > Três demandas, três tipos de pressão (financeira, comercial, executiva), três decisões de modelagem diferentes. Vamos atacar uma de cada vez — **na ordem em que chegaram** — porque é como acontece na vida real: você nunca decide tudo de uma vez, você reage a uma coisa, sente a consequência, e aí encara a próxima.
 
-Este laboratório é o que acontece nesse trimestre. Vamos sentir na prática por que **modelagem raramente sobrevive inalterada de um trimestre para o outro**. Cada evolução de negócio é aplicada sobre o star schema do Lab 03.1, e cada uma força uma decisão de redesign.
+Este laboratório é o que acontece nesse trimestre. Vamos sentir na prática por que **modelagem raramente sobrevive inalterada de um trimestre para o outro**. Cada evolução de negócio é aplicada sobre o star schema do Lab 03.2, e cada uma força uma decisão de redesign.
 
 > [!WARNING]
 > **Pré-requisitos obrigatórios antes de começar:**
 >
 > - [ ] Credenciais AWS do Academy atualizadas no Codespaces — ver [Preparando Credenciais](../../00-create-codespaces/Inicio-de-aula.md)
-> - [ ] Cluster Redshift `dw-aula3-<short_id>` em status `available` (Lab [03.0 · Provisionamento](../01-provisionamento/README.md) executado)
+> - [ ] Cluster Redshift `dw-aula3-<short_id>` em status `available` (Lab [03.1 · Provisionamento](../01-provisionamento/README.md) executado)
 > - [ ] Schema `dw_star` populado com o star schema SCD Tipo 1 (Lab [03.1 · Parte 3](../02-modelagem-e-carga/README.md#parte-3---modelagem-b-star-schema-com-scd-tipo-1) inteira executada)
 > - [ ] Você consegue conectar no Query Editor v2 ou via psql no Codespaces
 >
@@ -29,7 +29,7 @@ Este laboratório é o que acontece nesse trimestre. Vamos sentir na prática po
 > -- Esperado: 59986052
 > ```
 >
-> Se retornar `relation "dw_star.f_vendas" does not exist` ou `0 linhas`, volte ao Lab 03.1 e complete a Parte 3 antes de seguir aqui.
+> Se retornar `relation "dw_star.f_vendas" does not exist` ou `0 linhas`, volte ao Lab 03.2 e complete a Parte 3 antes de seguir aqui.
 
 ## O que você vai fazer
 
@@ -45,7 +45,7 @@ Este laboratório é o que acontece nesse trimestre. Vamos sentir na prática po
 
 ![Arquitetura das três evoluções](img/arquitetura-03-2.png)
 
-O diagrama resume: partindo do `dw_star` consolidado no Lab 03.1 (coluna da esquerda), três evoluções de negócio chegam no mesmo trimestre. Cada linha mostra a sequência **dor de negócio → solução técnica → decisão pedagógica**: Evolução 1 acrescenta comissão na receita (views + MV versionadas), Evolução 2 redefine "cliente ativo" (SCD2 vs. fato snapshot periódico), Evolução 3 exige SLA de 5s (redesign de distkey vs. MV pré-agregada). A faixa final sintetiza as quatro perguntas da reflexão do lab.
+O diagrama resume: partindo do `dw_star` consolidado no Lab 03.2 (coluna da esquerda), três evoluções de negócio chegam no mesmo trimestre. Cada linha mostra a sequência **dor de negócio → solução técnica → decisão pedagógica**: Evolução 1 acrescenta comissão na receita (views + MV versionadas), Evolução 2 redefine "cliente ativo" (SCD2 vs. fato snapshot periódico), Evolução 3 exige SLA de 5s (redesign de distkey vs. MV pré-agregada). A faixa final sintetiza as quatro perguntas da reflexão do lab.
 
 Fonte editável: [`img/arquitetura-03-2.drawio`](img/arquitetura-03-2.drawio).
 
@@ -69,7 +69,7 @@ Ao final deste laboratório, você terá aplicado três evoluções de negócio 
 
 | Parte | O que você faz | Tempo |
 |-------|----------------|-------|
-| [Parte 1](#parte-1---preparação-e-validação-do-ambiente) | Valida o cluster + schema do Lab 03.1 | ~5 min |
+| [Parte 1](#parte-1---preparação-e-validação-do-ambiente) | Valida o cluster + schema do Lab 03.2 | ~5 min |
 | [Parte 2](#parte-2---evolução-1-nova-fórmula-de-receita) | Evolução 1 — nova fórmula de receita (v1 vs v2) | ~20 min (1 min de execução + leitura) |
 | [Parte 3](#parte-3---evolução-2-redefinição-de-cliente-ativo) | Evolução 2 — redefinir "cliente ativo" (SCD2 vs snapshot) | ~25 min (2 min de execução + leitura, P15 particionado) |
 | [Parte 4](#parte-4---evolução-3-sla-de-5s-no-dashboard-executivo) | Evolução 3 — SLA de 5s (EXPLAIN + MV + redesign) | ~25 min (1 min de execução + leitura) |
@@ -110,7 +110,7 @@ Vamos atacar uma evolução de cada vez, na ordem em que chegaram.
 
 ### Resultado esperado desta parte
 
-Ao final desta etapa, você estará conectado ao Redshift com `dw_star` acessível, e terá confirmado que os objetos do Lab 03.1 continuam disponíveis.
+Ao final desta etapa, você estará conectado ao Redshift com `dw_star` acessível, e terá confirmado que os objetos do Lab 03.2 continuam disponíveis.
 
 1. No Redshift Query Editor v2, confirme que o schema `dw_star` existe e tem as tabelas esperadas:
 
@@ -127,7 +127,7 @@ ORDER BY tablename;
 O resultado deve conter `dim_customer`, `dim_data`, `dim_geografia`, `dim_produto`, `dim_supplier`, `f_vendas`.
 
 <!-- PRINT SUGERIDO: img/dw_star_tables_ok.png
-     Listagem das 6 tabelas do dw_star. Se faltar alguma, o aluno precisa voltar ao Lab 03.1. -->
+     Listagem das 6 tabelas do dw_star. Se faltar alguma, o aluno precisa voltar ao Lab 03.2. -->
 ![](img/dw_star_tables_ok.png)
 
 2. Confirme que `f_vendas` tem o volume correto:
@@ -140,7 +140,7 @@ Esperado: **59.986.052** linhas.
 
 ### Checkpoint
 
-Se você chegou até aqui, então o ambiente do Lab 03.1 está preservado e podemos começar as evoluções.
+Se você chegou até aqui, então o ambiente do Lab 03.2 está preservado e podemos começar as evoluções.
 
 ---
 
@@ -992,7 +992,7 @@ WHERE status = 'Running';
 <summary><b>💡 Clique para entender: por que DISTKEY(data_sk) agora?</b></summary>
 <blockquote>
 
-No Lab 03.1, escolhemos `DISTKEY(customer_sk)` porque não sabíamos qual seria o workload dominante. Agora sabemos: o dashboard executivo **filtra e agrupa por data/região**.
+No Lab 03.2, escolhemos `DISTKEY(customer_sk)` porque não sabíamos qual seria o workload dominante. Agora sabemos: o dashboard executivo **filtra e agrupa por data/região**.
 
 ### Por que DISTKEY(data_sk) ajuda
 
@@ -1152,7 +1152,7 @@ A mudança de DISTKEY beneficia **todo** o workload que filtre por data — não
 
 ### Rollback (opcional)
 
-28. Se quiser voltar ao estado original do Lab 03.1, faça:
+28. Se quiser voltar ao estado original do Lab 03.2, faça:
 
 ```sql
 DROP TABLE dw_star.f_vendas;
@@ -1173,7 +1173,7 @@ Se você chegou até aqui, então:
 
 ## Parte 5 - Reflexão final
 
-As perguntas abaixo não têm resposta única, mas têm respostas **melhores** que outras. Use-as para fechar o lab por escrito (no final do `DECISION.md` do Lab 03.1 ou em arquivo novo):
+As perguntas abaixo não têm resposta única, mas têm respostas **melhores** que outras. Use-as para fechar o lab por escrito (no final do `DECISION.md` do Lab 03.2 ou em arquivo novo):
 
 1. **"Você recalcularia o histórico com a nova fórmula de receita, ou manteria o número antigo congelado?"**
    Em que contexto a resposta muda?

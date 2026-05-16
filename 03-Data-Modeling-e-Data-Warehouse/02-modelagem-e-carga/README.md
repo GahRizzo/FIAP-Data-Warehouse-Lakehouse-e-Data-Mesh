@@ -1,4 +1,4 @@
-# 03.1 - Do OLTP ao Star Schema: três modelagens, três respostas
+# 03.2 - Do OLTP ao Star Schema: três modelagens, três respostas
 
 > **O cenário que vamos viver hoje.**
 > Imagine que você é engenheiro de dados na **TPCH Trading**, uma distribuidora B2B com sede em São Paulo. Sua diretora financeira, **Marina**, te procura no Slack:
@@ -21,7 +21,7 @@ Esse é o cenário que vamos explorar juntos durante a aula. Você vai acompanha
 > **Pré-requisitos obrigatórios antes de começar:**
 >
 > - [ ] Credenciais AWS do Academy atualizadas no Codespaces — ver [Preparando Credenciais](../../00-create-codespaces/Inicio-de-aula.md)
-> - [ ] Cluster Redshift `dw-aula3-<short_id>` em status `available` (Lab [03.0 · Provisionamento](../01-provisionamento/README.md) executado)
+> - [ ] Cluster Redshift `dw-aula3-<short_id>` em status `available` (Lab [03.1 · Provisionamento](../01-provisionamento/README.md) executado)
 > - [ ] Dataset TPC-H carregado em `s3://dw-lab-<ACCOUNT_ID>/raw/tpch/` (`load_tpch.sh` rodado com sucesso)
 > - [ ] Você consegue conectar no Query Editor v2 ou via psql no Codespaces
 >
@@ -31,7 +31,7 @@ Esse é o cenário que vamos explorar juntos durante a aula. Você vai acompanha
 > aws s3 ls "s3://dw-lab-$(aws sts get-caller-identity --query Account --output text)/raw/tpch/"
 > ```
 >
-> Esperado: `customer/`, `customer_history/`, `lineitem/`, `nation/`, `orders/`, `part/`, `partsupp/`, `region/`, `supplier/`. Se faltar algum, volte ao Lab 03.0 e rode `bash scripts/load_tpch.sh` novamente.
+> Esperado: `customer/`, `customer_history/`, `lineitem/`, `nation/`, `orders/`, `part/`, `partsupp/`, `region/`, `supplier/`. Se faltar algum, volte ao Lab 03.1 e rode `bash scripts/load_tpch.sh` novamente.
 
 ## O que você vai fazer
 
@@ -46,7 +46,7 @@ Três schemas no mesmo cluster Redshift, a mesma query-âncora rodada nos três,
 
 ![Arquitetura das três modelagens](img/arquitetura-03-1.png)
 
-O diagrama mostra o fluxo: (1) o dataset TPC-H carregado no Lab 03.0 alimenta via `COPY` o schema `oltp_mirror` (Modelagem A), (2) a partir dele são derivados o `dw_star` com SCD1 (Modelagem B) e o `dw_star_scd2` com SCD2 (Modelagem C), e (3) a mesma query-âncora rodada nos três schemas produz três números (N₁, N₂ ≈ N₁, N₃ ≠ N₁). A faixa inferior explica **por que** N₃ diverge.
+O diagrama mostra o fluxo: (1) o dataset TPC-H carregado no Lab 03.1 alimenta via `COPY` o schema `oltp_mirror` (Modelagem A), (2) a partir dele são derivados o `dw_star` com SCD1 (Modelagem B) e o `dw_star_scd2` com SCD2 (Modelagem C), e (3) a mesma query-âncora rodada nos três schemas produz três números (N₁, N₂ ≈ N₁, N₃ ≠ N₁). A faixa inferior explica **por que** N₃ diverge.
 
 Fonte editável: [`img/arquitetura-03-1.drawio`](img/arquitetura-03-1.drawio).
 
@@ -745,7 +745,7 @@ A causa mais comum é o bucket S3 estar vazio ou com caminho diferente. Confirme
 aws s3 ls "s3://dw-lab-$(aws sts get-caller-identity --query Account --output text)/raw/tpch/" --recursive
 ```
 
-Se o bucket estiver vazio, volte para o Lab 03.0 e rode `bash scripts/load_tpch.sh` novamente.
+Se o bucket estiver vazio, volte para o Lab 03.1 e rode `bash scripts/load_tpch.sh` novamente.
 
 </blockquote>
 </details>
@@ -1222,7 +1222,7 @@ Na fato criamos três colunas de receita calculadas:
 
 ### Por que materializar em vez de calcular on-the-fly
 
-**Contratualização**. Toda query analítica que precisar desses números vai usar a mesma fórmula, sem risco de um time aplicar a fórmula errada. Mudar a coluna do dia para noite não é trivial — é exatamente isso que exploramos no Lab 03.2.
+**Contratualização**. Toda query analítica que precisar desses números vai usar a mesma fórmula, sem risco de um time aplicar a fórmula errada. Mudar a coluna do dia para noite não é trivial — é exatamente isso que exploramos no Lab 03.3.
 
 ### Trade-off de storage
 
@@ -1731,7 +1731,7 @@ Este laboratório serve como base para o próximo exercício, onde você vai sen
 
 ## Próximo passo
 
-No [Lab 03.2](../03-analise-dimensional/README.md) você vai partir do schema que escolheu aqui e ver o que acontece quando o **negócio evolui**: nova fórmula de receita, redefinição de "cliente ativo", SLA apertado de dashboard.
+No [Lab 03.3](../03-analise-dimensional/README.md) você vai partir do schema que escolheu aqui e ver o que acontece quando o **negócio evolui**: nova fórmula de receita, redefinição de "cliente ativo", SLA apertado de dashboard.
 
 ---
 

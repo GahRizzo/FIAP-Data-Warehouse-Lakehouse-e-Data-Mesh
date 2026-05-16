@@ -1,4 +1,4 @@
-# 03 · Parte 1 — Provisionamento da infraestrutura
+# 03.1 - Provisionamento da infraestrutura
 
 Este é o primeiro passo do Lab 03. Aqui o aluno sobe — via **Terraform** — toda a infraestrutura necessária para os exercícios de modelagem dimensional e Redshift. Nenhum clique em console além de copiar credenciais do AWS Academy.
 
@@ -153,7 +153,7 @@ Tempo típico: **~1m40**. O script:
 
 1. Lê `terraform output` para descobrir bucket de destino, região e Glue DB
 2. Copia (S3-to-S3, server-side, **em paralelo**) as 8 tabelas `.tbl` do TPC-H SF10 de `s3://redshift-downloads/TPC-H/2.18/10GB/` (bucket público da AWS) direto para `s3://<bucket-aluno>/raw/tpch/`
-3. Baixa apenas o `customer.tbl` (232 MB) localmente para gerar a tabela sintética `customer_history` (75k reclassificações com seed 42, essencial para o SCD2 do Lab 03.1)
+3. Baixa apenas o `customer.tbl` (232 MB) localmente para gerar a tabela sintética `customer_history` (75k reclassificações com seed 42, essencial para o SCD2 do Lab 03.2)
 4. Faz upload do `customer_history.tbl` para o S3
 5. Registra as 9 tabelas no Glue Data Catalog (formato CSV `|` delimitado)
 
@@ -170,7 +170,7 @@ customer_history
 └── valid_from       (data em que o novo segmento entrou em vigor)
 ```
 
-O script sorteia **5% dos clientes** (semente fixa 42, todos os alunos obtêm o mesmo conjunto) e atribui a cada um uma data de mudança entre 1996-01-01 e 1998-12-31 — ou seja, **posterior ao ano 1995** que é o recorte da query-âncora do Lab 03.1.
+O script sorteia **5% dos clientes** (semente fixa 42, todos os alunos obtêm o mesmo conjunto) e atribui a cada um uma data de mudança entre 1996-01-01 e 1998-12-31 — ou seja, **posterior ao ano 1995** que é o recorte da query-âncora do Lab 03.2.
 
 Isso cria um cenário real: "o cliente X comprou em 1995 quando era `AUTOMOBILE`, depois virou `BUILDING` em 1997". Ao modelar com SCD Tipo 1, a venda de 1995 é reatribuída ao segmento atual (`BUILDING`). Ao modelar com SCD Tipo 2, ela permanece atribuída ao segmento da época (`AUTOMOBILE`). Os números divergem. Esse é o ponto.
 
@@ -248,7 +248,7 @@ Verifique, em ordem:
 </blockquote>
 </details>
 
-### 4. Prossiga para o Lab 03.1
+### 4. Prossiga para o Lab 03.2
 
 ```bash
 cd /workspaces/FIAP-Data-Warehouse-Lakehouse-e-Data-Mesh/03-Data-Modeling-e-Data-Warehouse/02-modelagem-e-carga

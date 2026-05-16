@@ -140,7 +140,7 @@ Essa narrativa não é decorativa. Ela **força o aluno a enfrentar a ambiguidad
 
 ---
 
-### Lab 03.1 — Do OLTP ao Star Schema: três modelagens, três respostas
+### Lab 03.2 — Do OLTP ao Star Schema: três modelagens, três respostas
 
 **Duração estimada**: 75-100 min
 
@@ -226,13 +226,13 @@ O aluno roda a query-âncora nos três schemas e obtém **três números diferen
 
 ---
 
-### Lab 03.2 — Evolução do negócio: quando a modelagem tem que mudar
+### Lab 03.3 — Evolução do negócio: quando a modelagem tem que mudar
 
 **Duração estimada**: 70-90 min
 
 **Objetivo pedagógico**: simular que **o negócio mudou** e observar o que isso faz com o modelo escolhido. O aluno vê que evolução de negócio é uma força **constante** sobre o warehouse, e que decisões de modelagem tomadas no dia 1 raramente sobrevivem ao ano 2 sem ajuste. O recurso do Redshift vira consequência do problema de negócio, não o contrário.
 
-**Três evoluções aplicadas sobre o star schema do Lab 03.1:**
+**Três evoluções aplicadas sobre o star schema do Lab 03.2:**
 
 #### Evolução 1 — "Abrimos um novo canal e queremos medir margem real"
 
@@ -256,7 +256,7 @@ Antes, cliente ativo era "fez ao menos uma compra". Agora, é "fez ao menos uma 
 
 O dashboard de receita por região × mês × segmento tem que carregar em menos de 5s, mesmo com dados crescendo 3x ao ano. A query atual faz hash join + redistribute porque a distkey foi colocada em `customer_sk`, mas o filtro mais frequente é por `data_sk`.
 
-- **Dor**: a distkey que era ótima para o Lab 03.1 passou a ser um problema
+- **Dor**: a distkey que era ótima para o Lab 03.2 passou a ser um problema
 - **Resposta técnica no Redshift**: reconstruir `f_vendas` com `DISTKEY(data_sk)` ou `DISTSTYLE AUTO`, comparar `EXPLAIN ANALYZE` antes e depois, criar Materialized View pré-agregada para o dashboard
 - **Decisão pedagógica**: mudar distkey é custoso (recria tabela). Vale? Ou criar uma **segunda** cópia pré-agregada (uma MV) é melhor?
 - **Recursos do Redshift envolvidos**: `DISTSTYLE AUTO`, Materialized View com refresh agendado, `STL_QUERY`/`SYS_QUERY_HISTORY` para medir latência real
@@ -334,10 +334,10 @@ Toda a infraestrutura sobe via **Terraform** na pasta `01-provisionamento/`. Nen
 │    ├── master user: admin                                │
 │    ├── publicly accessible: true (pra Codespaces chegar) │
 │    └── schemas criados nos labs:                         │
-│          ├── oltp_mirror     (Lab 03.1 — Modelagem A)    │
-│          ├── dw_star         (Lab 03.1 — Modelagem B)    │
-│          ├── dw_star_scd2    (Lab 03.1 — Modelagem C)    │
-│          └── dw_evolucao     (Lab 03.2 — extensões)      │
+│          ├── oltp_mirror     (Lab 03.2 — Modelagem A)    │
+│          ├── dw_star         (Lab 03.2 — Modelagem B)    │
+│          ├── dw_star_scd2    (Lab 03.2 — Modelagem C)    │
+│          └── dw_evolucao     (Lab 03.3 — extensões)      │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -395,13 +395,13 @@ O shell script `load_tpch.sh` é o único script — e só roda porque:
 │   ├── versions.tf
 │   └── scripts/
 │       └── load_tpch.sh               ← dataset ingestion (uma vez)
-├── 02-modelagem-e-carga/                ← Lab 03.1 (três modelagens, três respostas)
+├── 02-modelagem-e-carga/                ← Lab 03.2 (três modelagens, três respostas)
 │   ├── README.md                       ← passo a passo narrativo + todos os SQLs inline
 │   ├── DECISION_TEMPLATE.md            ← template p/ aluno documentar escolha
 │   └── img/
 │       ├── arquitetura-03-1.drawio
 │       └── arquitetura-03-1.png
-└── 03-analise-dimensional/              ← Lab 03.2 (três evoluções do negócio)
+└── 03-analise-dimensional/              ← Lab 03.3 (três evoluções do negócio)
     ├── README.md                       ← passo a passo narrativo + todos os SQLs inline
     └── img/
         ├── arquitetura-03-2.drawio
@@ -450,7 +450,7 @@ O Codespaces já tem AWS CLI, Python e psql disponíveis (ver [.devcontainer/REA
 ## Por que isso é legal pedagogicamente
 
 1. **A mesma pergunta, respostas diferentes** — o aluno vê concretamente que "o número" depende da modelagem, não só dos dados. Isso muda a forma dele conversar com stakeholders pelo resto da carreira.
-2. **Narrativa de evolução de negócio** — o Lab 03.2 força o aluno a sentir a dor de modelar para o hoje e precisar acomodar o amanhã. Essa é a realidade de 100% dos warehouses em produção.
+2. **Narrativa de evolução de negócio** — o Lab 03.3 força o aluno a sentir a dor de modelar para o hoje e precisar acomodar o amanhã. Essa é a realidade de 100% dos warehouses em produção.
 3. **Resultados determinísticos dentro de cada modelagem** — o aluno A e o aluno B, rodando a **mesma modelagem** com o **mesmo dataset**, obtêm **o mesmo número**. Diferenças entre modelagens são pedagógicas; diferenças entre colegas são bugs.
 4. **Infra como código desde o dia 1** — alunos saem sabendo que cluster Redshift não é algo mágico que alguém clica para subir; é código versionado.
 5. **Foco no que importa** — o aluno gasta tempo pensando em grain, SCD, trade-offs de distkey e negociação com o negócio, não clicando em wizard da AWS.
@@ -490,7 +490,7 @@ bash scripts/load_tpch.sh                    ← 3-5 min (download + upload + cu
     │
     ▼
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Lab 03.1 — Três modelagens, três respostas (75-100 min)
+  Lab 03.2 — Três modelagens, três respostas (75-100 min)
   cd 02-modelagem-e-carga/
     Etapa A: oltp_mirror       → query-âncora → anota número
     Etapa B: dw_star (SCD1)    → query-âncora → anota número
@@ -501,7 +501,7 @@ bash scripts/load_tpch.sh                    ← 3-5 min (download + upload + cu
     │
     ▼
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Lab 03.2 — Evolução do negócio (70-90 min)
+  Lab 03.3 — Evolução do negócio (70-90 min)
   cd 03-analise-dimensional/
     Evolução 1: nova fórmula de receita (MV vs. view)
     Evolução 2: "cliente ativo" (SCD2 vs. snapshot periódico)
