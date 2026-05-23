@@ -2,7 +2,7 @@
 
 > **6 meses depois do Lab 03.2.**
 >
-> O `DECISION.md` que escrevemos juntos foi aprovado. O DW da TPCH Trading entrou em produção. Por 4 meses, ninguém liga para o engenheiro de dados — sinal verde. Aí, num único trimestre, **três pessoas batem na sua porta**:
+> A recomendação que mandamos para Marina passou no conselho. O DW da TPCH Trading entrou em produção. Por 4 meses, ninguém liga para o engenheiro de dados — sinal verde. Aí, num único trimestre, **três pessoas batem na sua porta**:
 >
 > - **Marina (CFO)**: *"Janeiro: começamos a vender em marketplaces. Eles cobram comissão variável por fornecedor. Quero que a receita líquida que eu reporto reflita isso. Mas e os relatórios que já publiquei? Vão mudar de número?"*
 >
@@ -85,17 +85,15 @@ Ao final deste laboratório, você terá aplicado três evoluções de negócio 
 
 A linha do tempo do trimestre, com Marina, Lucas e o CEO entrando em cena cada um na sua hora:
 
+```mermaid
+timeline
+    title Trimestre pos-go-live do DW (T+4 meses)
+    Janeiro  : Marina (CFO)<br/>Comissao de marketplace<br/>"Receita liquida muda de formula. E o historico que ja publiquei?"
+    Marco    : Lucas (CMO)<br/>Redefinir 'cliente ativo'<br/>"Comprou nos ultimos 12m E saldo OK. Funciona?"
+    Maio     : CEO<br/>SLA 5s no dashboard<br/>"Demora 20s. Inaceitavel. Quero 5s ate sexta."
 ```
-JAN ────► MAR ────► MAI
- │         │         │
- ▼         ▼         ▼
-Marina    Lucas    CEO
-(CFO)     (CMO)    (executivo)
 
-Comissão  Cliente  SLA 5s
-de        ativo    no
-marketplace        dashboard
-```
+Três pessoas, três meses diferentes, três tipos de pressão (financeira → comercial → executiva). **Resolvemos uma de cada vez, na ordem em que chegaram** — porque é como acontece na vida real: você reage a uma demanda, sente a consequência, e aí encara a próxima.
 
 Cada evolução **muda o significado dos números** ou **muda como o dashboard performa**. E cada uma força uma decisão arquitetural diferente:
 
@@ -119,22 +117,17 @@ Ao final desta etapa, você estará conectado ao Redshift com `dw_star` acessív
 
 <a id="passo-1"></a>
 
-1. No Redshift Query Editor v2, confirme que o schema `dw_star` existe e tem as tabelas esperadas:
+1. No [Redshift Query Editor v2](https://us-east-1.console.aws.amazon.com/sqlworkbench/home?region=us-east-1), confirme que o schema `dw_star` existe e tem as tabelas esperadas. Usamos `SVV_TABLES` (system view oficial do Redshift) em vez de `pg_tables` porque a system view é confiável em qualquer modo de sessão:
 
 ```sql
-SELECT
-    schemaname,
-    tablename,
-    tableowner
-FROM pg_tables
-WHERE schemaname = 'dw_star'
-ORDER BY tablename;
+SELECT table_schema, table_name, table_type
+FROM   SVV_TABLES
+WHERE  table_schema = 'dw_star'
+ORDER  BY table_name;
 ```
 
-O resultado deve conter `dim_customer`, `dim_data`, `dim_geografia`, `dim_produto`, `dim_supplier`, `f_vendas`.
+O resultado deve conter as 6 linhas: `dim_customer`, `dim_data`, `dim_geografia`, `dim_produto`, `dim_supplier`, `f_vendas`.
 
-<!-- PRINT SUGERIDO: img/dw_star_tables_ok.png
-     Listagem das 6 tabelas do dw_star. Se faltar alguma, o aluno precisa voltar ao Lab 03.2. -->
 ![](img/dw_star_tables_ok.png)
 
 ---
@@ -205,9 +198,7 @@ GROUP BY pct_comissao
 ORDER BY pct_comissao;
 ```
 
-<!-- PRINT SUGERIDO: img/pct_comissao_distribuicao.png
-     Tabela com comissões de 0.03 a 0.12 e a quantidade de fornecedores em cada faixa.
-     Deve dar ~10000 fornecedores por faixa (total 100000, 10 faixas). -->
+
 ![](img/pct_comissao_distribuicao.png)
 
 <details>
@@ -275,23 +266,31 @@ JOIN dw_star.dim_supplier s ON s.supplier_sk = f.supplier_sk;
 
 <a id="passo-6"></a>
 
-6. Compare os totais para ver o impacto da comissão:
+6. Compare os totais para ver o impacto da comissão. Cada linha tem um rótulo descritivo deixando explícito qual fórmula foi aplicada:
 
 ```sql
-SELECT 'v1_total' AS serie, ROUND(SUM(vl_receita_liquida), 2) AS valor
+SELECT 'v1 - SEM comissao (formula antiga)'  AS serie,
+       ROUND(SUM(vl_receita_liquida), 2)     AS valor
 FROM dw_star.v_receita_liquida_v1
 UNION ALL
-SELECT 'v2_total', ROUND(SUM(vl_receita_liquida), 2)
-FROM dw_star.v_receita_liquida_v2;
+SELECT 'v2 - COM comissao (formula nova)',
+       ROUND(SUM(vl_receita_liquida), 2)
+FROM dw_star.v_receita_liquida_v2
+UNION ALL
+SELECT 'diferenca (v2 - v1)',
+       ROUND(
+         (SELECT SUM(vl_receita_liquida) FROM dw_star.v_receita_liquida_v2)
+       - (SELECT SUM(vl_receita_liquida) FROM dw_star.v_receita_liquida_v1)
+       , 2);
 ```
 
 <!-- PRINT SUGERIDO: img/v1_vs_v2_total.png
-     Dois valores: v1_total e v2_total. v2 é menor (desconta comissão).
-     A diferença percentual reflete a comissão média ponderada pela receita. -->
+     Tres linhas: v1 (sem comissao), v2 (com comissao, menor), diferenca (negativa).
+     Aluno enxerga imediatamente qual e a com comissao e o tamanho do impacto. -->
 ![](img/v1_vs_v2_total.png)
 
 > [!NOTE]
-> `v2_total` deve ser sempre **menor** que `v1_total` porque desconta comissão. A diferença percentual reflete a comissão média ponderada pela receita.
+> A linha **v2** é sempre **menor** que **v1** porque desconta comissão. A linha **diferenca** é o impacto absoluto (negativo) — corresponde à comissão média ponderada pela receita.
 
 <details>
 <summary><b>💡 Clique para entender: por que preservar a v1 em vez de substituir</b></summary>
@@ -367,8 +366,16 @@ WHERE schema_name = 'dw_star'
 ```
 
 <!-- PRINT SUGERIDO: img/mv_status_ok.png
-     Linha mostrando is_stale=false, autorefresh=t, state=OK. -->
+     Linha mostrando is_stale=f, autorefresh=t, state=1 (refresh incremental
+     habilitado — caso ideal). -->
 ![](img/mv_status_ok.png)
+
+> [!TIP]
+> Resultado esperado: `is_stale=f`, `autorefresh=t`, `state=1`.
+>
+> - **`is_stale=f`** → MV está sincronizada com `f_vendas`.
+> - **`autorefresh=t`** → Redshift vai refrescar automaticamente quando a base mudar.
+> - **`state=1`** (inteiro, não texto): MV pode fazer **refresh incremental** (só processa o delta). Outros valores possíveis: `0` = recomputed (refresh completo), `-1` = exige recompute total.
 
 <details>
 <summary><b>⚠ Se <code>is_stale = true</code> ou <code>autorefresh = false</code></b></summary>
@@ -451,39 +458,35 @@ JOIN v2_ano v2 ON v2.nr_ano = v1.nr_ano
 ORDER BY v1.nr_ano;
 ```
 
-<!-- PRINT SUGERIDO: img/v1_v2_por_ano.png
-     Tabela ano a ano com receita_v1, receita_v2 e a diferença percentual.
-     Destaca que a diferença é relativamente estável (~7-8% em todos os anos). -->
 ![](img/v1_v2_por_ano.png)
 
 ---
 
 <a id="passo-10"></a>
 
-10. Compare a performance de buscar receita via view vs. MV:
+10. **Pergunta**: *"Marina precisa do dashboard mensal por região × segmento de 1997. Quantas linhas a engine processa em cada caminho — view (recalcula tudo) vs. MV (pré-agregada)?"*. Em vez de ler 2 `EXPLAIN` em sala, rodamos uma única query que conta volumes:
 
 ```sql
--- Via view — sempre recalcula joins
-EXPLAIN
-SELECT d.nr_ano, d.nr_mes, g.nm_regiao, c.sg_segmento, SUM(v.vl_receita_liquida)
-FROM dw_star.v_receita_liquida_v2 v
-JOIN dw_star.dim_data      d ON d.data_sk      = v.data_sk
-JOIN dw_star.dim_geografia g ON g.geografia_sk = v.geografia_sk
-JOIN dw_star.dim_customer  c ON c.customer_sk  = v.customer_sk
-WHERE d.nr_ano = 1997
-GROUP BY d.nr_ano, d.nr_mes, g.nm_regiao, c.sg_segmento;
-
--- Via MV — já pré-agregada
-EXPLAIN
-SELECT nr_ano, nr_mes, nm_regiao, sg_segmento, SUM(vl_receita_v2)
-FROM dw_star.mv_receita_liquida_v2_mensal
-WHERE nr_ano = 1997
-GROUP BY nr_ano, nr_mes, nm_regiao, sg_segmento;
+SELECT 'caminho A - via view (recalcula joins)' AS caminho,
+       (SELECT COUNT(*) FROM dw_star.f_vendas
+          WHERE data_sk BETWEEN 19970101 AND 19971231)
+       + (SELECT COUNT(*) FROM dw_star.dim_customer)
+       + (SELECT COUNT(*) FROM dw_star.dim_geografia)
+       + (SELECT COUNT(*) FROM dw_star.dim_data
+            WHERE nr_ano = 1997)                    AS linhas_processadas,
+       3                                            AS qtd_joins
+UNION ALL
+SELECT 'caminho B - via MV (pre-agregada)',
+       (SELECT COUNT(*) FROM dw_star.mv_receita_liquida_v2_mensal
+          WHERE nr_ano = 1997),
+       0
+ORDER BY linhas_processadas DESC;
 ```
 
-<!-- PRINT SUGERIDO: img/explain_view_vs_mv.png
-     Dois planos lado a lado. O da view mostra múltiplos XN Hash Join. O da MV mostra apenas Aggregate + XN Seq Scan da MV. -->
 ![](img/explain_view_vs_mv.png)
+
+> [!TIP]
+> Esperado: o **caminho A** processa milhões de linhas (≈ 8,5M de `f_vendas` 1997 + 1,5M de `dim_customer` + 25 + 365) com **3 joins**. O **caminho B** processa **algumas centenas de linhas** (12 meses × 5 regiões × 5 segmentos = ~300) com **zero joins**. **Mesma resposta de negócio, ~30.000× menos trabalho.** É isso que paga a MV: você troca um pouco de espaço em disco e refresh em background pelo SLA de leitura.
 
 ### Reflexão: recalcular ou congelar?
 
@@ -715,62 +718,74 @@ SORTKEY (data_sk);
 
 <a id="passo-15"></a>
 
-15. Popule a fato snapshot. Em SF10 são **~108M linhas** (1,5M clientes × 72 meses), o que é pesado de uma vez só. Particionamos a carga **ano por ano** — 6 INSERTs sequenciais, cada um terminando em ~30-60s:
+15. Popule a fato snapshot. Em SF10 são **~108M linhas** (1,5M clientes × 72 meses), o que é pesado de uma vez só — então particionamos a carga **ano por ano** dentro de uma `stored procedure` com loop. O aluno cria a proc uma vez e executa um único `CALL` (~5-6 min total):
 
 ```sql
--- 1996
-INSERT INTO dw_star.f_customer_status_mensal
-WITH meses AS (
-    SELECT DISTINCT
-        DATE_TRUNC('month', dt_completa) :: DATE AS mes_ref,
-        CAST(TO_CHAR(DATE_TRUNC('month', dt_completa), 'YYYYMMDD') AS INTEGER) AS data_sk
-    FROM dw_star.dim_data
-    WHERE EXTRACT(YEAR FROM dt_completa) = 1996
-),
-clientes_com_compra AS (
-    SELECT DISTINCT customer_sk FROM dw_star.f_vendas
-),
-compras_mensais AS (
-    SELECT
-        f.customer_sk,
-        DATE_TRUNC('month', d.dt_completa) :: DATE AS mes_compra,
-        COUNT(DISTINCT f.nr_pedido) AS qt_pedidos,
-        SUM(f.vl_receita_liquida)   AS vl_receita
-    FROM dw_star.f_vendas f
-    JOIN dw_star.dim_data d ON d.data_sk = f.data_sk
-    WHERE d.dt_completa >= DATE '1995-01-01'
-      AND d.dt_completa <  DATE '1997-01-01'
-    GROUP BY f.customer_sk, DATE_TRUNC('month', d.dt_completa)
-),
-agregado_12m AS (
-    SELECT
-        m.mes_ref, m.data_sk, c.customer_sk, c.vl_saldo,
-        COALESCE(SUM(cm.qt_pedidos), 0) AS qt_pedidos,
-        COALESCE(SUM(cm.vl_receita), 0) AS vl_receita
-    FROM meses m
-    CROSS JOIN dw_star.dim_customer c
-    LEFT JOIN compras_mensais cm
-      ON cm.customer_sk = c.customer_sk
-     AND cm.mes_compra >= DATEADD(month, -12, m.mes_ref)
-     AND cm.mes_compra <  m.mes_ref
-    WHERE c.customer_sk IN (SELECT customer_sk FROM clientes_com_compra)
-    GROUP BY m.mes_ref, m.data_sk, c.customer_sk, c.vl_saldo
+CREATE OR REPLACE PROCEDURE dw_star.sp_load_customer_status_mensal(
+    ano_inicio INT,
+    ano_fim    INT
 )
-SELECT
-    data_sk, customer_sk,
-    CASE WHEN qt_pedidos > 0 AND vl_saldo > -5000 THEN TRUE ELSE FALSE END AS is_active,
-    qt_pedidos AS qt_pedidos_12m,
-    vl_receita AS vl_receita_12m
-FROM agregado_12m;
-```
+AS $$
+DECLARE
+    ano INT;
+BEGIN
+    FOR ano IN ano_inicio..ano_fim LOOP
+        RAISE INFO 'carregando ano %', ano;
 
-Repita o bloco acima trocando o ano em **três lugares**: na CTE `meses` (`EXTRACT(YEAR FROM dt_completa) = ANO`), e nas duas datas da CTE `compras_mensais` (filtra `ANO-1` e `ANO+1`). Os anos a rodar são **1993, 1994, 1995, 1996, 1997, 1998**.
+        INSERT INTO dw_star.f_customer_status_mensal
+        WITH meses AS (
+            SELECT DISTINCT
+                DATE_TRUNC('month', dt_completa) :: DATE                              AS mes_ref,
+                CAST(TO_CHAR(DATE_TRUNC('month', dt_completa), 'YYYYMMDD') AS INTEGER) AS data_sk
+            FROM dw_star.dim_data
+            WHERE EXTRACT(YEAR FROM dt_completa) = ano
+        ),
+        clientes_com_compra AS (
+            SELECT DISTINCT customer_sk FROM dw_star.f_vendas
+        ),
+        compras_mensais AS (
+            SELECT
+                f.customer_sk,
+                DATE_TRUNC('month', d.dt_completa) :: DATE AS mes_compra,
+                COUNT(DISTINCT f.nr_pedido)                AS qt_pedidos,
+                SUM(f.vl_receita_liquida)                  AS vl_receita
+            FROM dw_star.f_vendas f
+            JOIN dw_star.dim_data d ON d.data_sk = f.data_sk
+            WHERE EXTRACT(YEAR FROM d.dt_completa) IN (ano - 1, ano)
+            GROUP BY f.customer_sk, DATE_TRUNC('month', d.dt_completa)
+        ),
+        agregado_12m AS (
+            SELECT
+                m.mes_ref, m.data_sk, c.customer_sk, c.vl_saldo,
+                COALESCE(SUM(cm.qt_pedidos), 0) AS qt_pedidos,
+                COALESCE(SUM(cm.vl_receita), 0) AS vl_receita
+            FROM meses m
+            CROSS JOIN dw_star.dim_customer c
+            LEFT JOIN compras_mensais cm
+              ON cm.customer_sk = c.customer_sk
+             AND cm.mes_compra >= DATEADD(month, -12, m.mes_ref)
+             AND cm.mes_compra <  m.mes_ref
+            WHERE c.customer_sk IN (SELECT customer_sk FROM clientes_com_compra)
+            GROUP BY m.mes_ref, m.data_sk, c.customer_sk, c.vl_saldo
+        )
+        SELECT
+            data_sk, customer_sk,
+            CASE WHEN qt_pedidos > 0 AND vl_saldo > -5000 THEN TRUE ELSE FALSE END AS is_active,
+            qt_pedidos AS qt_pedidos_12m,
+            vl_receita AS vl_receita_12m
+        FROM agregado_12m;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
 
-Após os 6 INSERTs, atualize as estatísticas:
-
-```sql
+CALL dw_star.sp_load_customer_status_mensal(1993, 1998);
 ANALYZE dw_star.f_customer_status_mensal;
 ```
+
+![](img/procedure_call_years.png)
+
+> [!TIP]
+> No Query Editor v2, expanda **Messages** depois de rodar o `CALL` para acompanhar os `RAISE INFO 'carregando ano XXXX'` — você vê em tempo real qual ano está processando. Se quiser pular a etapa pesada (~5-6 min) e seguir, troque os argumentos do `CALL` para `(1996, 1998)` — apenas 3 anos. As queries 16-19 ainda funcionam, só não têm dados anteriores a 1996.
 
 <details>
 <summary><b>💡 Clique para entender: por que particionar a carga por ano</b></summary>
@@ -814,10 +829,6 @@ GROUP BY data_sk;
 > [!TIP]
 > Os dois resultados (SCD2 + snapshot) devem ser iguais dentro de diferenças de borda. Se divergirem muito, a definição de "ativo" entre as duas implementações está inconsistente.
 
-<!-- PRINT SUGERIDO: img/snapshot_ativos_19960601.png
-     Resultado: data_sk=19960601, qtd_ativos=868239. Mesmo numero do
-     passo 13 (SCD2). Validacao cruzada — duas modelagens diferentes
-     respondem identico para a mesma pergunta pontual. -->
 ![](img/snapshot_ativos_19960601.png)
 
 ### Comparando as abordagens
@@ -826,13 +837,13 @@ GROUP BY data_sk;
 
 <a id="passo-17"></a>
 
-17. Rode uma pergunta que **favorece o snapshot** — evolução mensal de ativos em 3 anos:
+17. Rode uma pergunta que **favorece o snapshot** — evolução mensal de ativos em 3 anos. Convertendo `data_sk` (`YYYYMMDD` inteiro) para `YYYY-MM` deixa a leitura cronológica imediata:
 
 ```sql
 -- Via snapshot: trivialmente rápido
 SELECT
-    data_sk,
-    SUM(CASE WHEN is_active THEN 1 ELSE 0 END) AS qtd_ativos
+    TO_CHAR(TO_DATE(data_sk::TEXT, 'YYYYMMDD'), 'YYYY-MM') AS mes,
+    SUM(CASE WHEN is_active THEN 1 ELSE 0 END)             AS qtd_ativos
 FROM dw_star.f_customer_status_mensal
 WHERE data_sk BETWEEN 19960101 AND 19981231
 GROUP BY data_sk
@@ -968,8 +979,6 @@ ORDER BY d.nr_ano, d.nr_mes, g.nm_regiao, c.sg_segmento;
 > [!TIP]
 > No Query Editor v2, o tempo de execução aparece no canto inferior do painel de resultados. Anote a mediana das 3 execuções. Esse é seu **baseline**.
 
-<!-- PRINT SUGERIDO: img/baseline_execution_time.png
-     Canto inferior do Query Editor v2 mostrando "Query executed in: Xs". Esse é o baseline. -->
 ![](img/baseline_execution_time.png)
 
 <details>
@@ -1294,7 +1303,7 @@ Se você chegou até aqui, então:
 
 ## Parte 5 - Reflexão final
 
-As perguntas abaixo não têm resposta única, mas têm respostas **melhores** que outras. Use-as para fechar o lab por escrito (no final do `DECISION.md` do Lab 03.2 ou em arquivo novo):
+As perguntas abaixo não têm resposta única, mas têm respostas **melhores** que outras. Use-as para fechar o lab discutindo em sala (ou anotando no caderno, ou estendendo o recado-Marina do Lab 03.2 com mais 4 linhas para Lucas/CEO):
 
 **Pergunta R1.** **"Você recalcularia o histórico com a nova fórmula de receita, ou manteria o número antigo congelado?"**
 Em que contexto a resposta muda?
