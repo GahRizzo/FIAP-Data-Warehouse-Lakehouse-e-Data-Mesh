@@ -114,8 +114,38 @@ flowchart LR
 
 ```mermaid
 erDiagram
+    clientes {
+        string id_cliente "RAW · Glue Crawler"
+        string nome
+        string sobrenome
+        int ano_nascimento
+        string cidade
+        string estado
+        string segmento
+    }
+    pedidos {
+        string id_pedido "RAW · Glue Crawler"
+        string id_cliente
+        string data_pedido "STRING (vai virar DATE)"
+        string categoria_produto
+        bigint quantidade
+        double preco_unitario
+        double desconto
+        double frete
+    }
+    pedidos_delta {
+        string id_pedido "RAW · 3 INSERTs + 2 UPDATEs"
+        string id_cliente
+        string data_pedido "STRING"
+        string categoria_produto
+        bigint quantidade
+        double preco_unitario
+        double desconto
+        double frete
+    }
+
     clientes_iceberg {
-        string id_cliente PK
+        string id_cliente PK "ICEBERG PRINCIPAL"
         string nome
         string sobrenome
         int ano_nascimento
@@ -124,7 +154,7 @@ erDiagram
         string segmento
     }
     pedidos_iceberg {
-        string id_pedido PK
+        string id_pedido PK "ICEBERG PRINCIPAL"
         string id_cliente FK
         date data_pedido "convertido na CTAS"
         string categoria_produto
@@ -134,10 +164,26 @@ erDiagram
         double frete
         double valor_final "ALTER+UPDATE Tarefa 5"
     }
-    clientes_iceberg ||--o{ pedidos_iceberg : "JOIN id_cliente (Tarefa 8)"
+    pedidos_delta_iceberg {
+        string id_pedido "ICEBERG AUXILIAR (descartavel)"
+        string id_cliente
+        date data_pedido
+        string categoria_produto
+        bigint quantidade
+        double preco_unitario
+        double desconto
+        double frete
+        double valor_final "calculado na CTAS"
+    }
+
+    clientes ||--|| clientes_iceberg : "1- INSERT INTO (Tarefa 4)"
+    pedidos ||--|| pedidos_iceberg : "2- INSERT INTO + CAST data_pedido (Tarefa 4)"
+    pedidos_delta ||--|| pedidos_delta_iceberg : "3- CTAS + valor_final (Tarefa 6)"
+    pedidos_delta_iceberg }o--|| pedidos_iceberg : "4- MERGE INTO 3 INS + 2 UPD (Tarefa 6)"
+    clientes_iceberg ||--o{ pedidos_iceberg : "5- JOIN id_cliente (Tarefa 8)"
 ```
 
-As colunas das 3 tabelas raw e da auxiliar são iguais às de `pedidos_iceberg` (a auxiliar herda colunas via CTAS), apenas com `data_pedido` ainda como `STRING` nas raws.
+A primeira coluna de descrição em cada tabela diz a **categoria** (RAW / ICEBERG PRINCIPAL / ICEBERG AUXILIAR), batendo com as cores do flowchart acima. Os relacionamentos estão numerados na **ordem de execução** (1 → 5) para você seguir o fluxo cronologicamente.
 
 ## Mapa do trabalho
 
