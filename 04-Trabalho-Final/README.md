@@ -65,42 +65,57 @@ Uma tabela `pedidos_iceberg` populada com **100.003 pedidos** (100k iniciais + 3
 
 ## Modelo de dados final no Athena
 
-O diagrama abaixo mostra as 6 tabelas que você vai materializar no database `trabalho_final_aluno` e como elas se relacionam ao longo das tarefas.
+São **6 tabelas** organizadas em **3 grupos**: 3 raws criadas pelo Glue Crawler, 2 Iceberg principais (entrega final) e 1 Iceberg auxiliar usada só no MERGE.
+
+### Fluxo entre os grupos
+
+```mermaid
+flowchart LR
+    subgraph RAW["🟦 RAW · Glue Crawler (Tarefa 2)"]
+        direction TB
+        R1[clientes]
+        R2[pedidos]
+        R3[pedidos_delta]
+    end
+
+    subgraph ICE_AUX["🟧 ICEBERG AUXILIAR · só para o MERGE (Tarefa 6)"]
+        direction TB
+        A1[pedidos_delta_iceberg]
+    end
+
+    subgraph ICE_MAIN["🟩 ICEBERG PRINCIPAIS · entregáveis (Tarefas 3-7)"]
+        direction TB
+        I1[clientes_iceberg]
+        I2[pedidos_iceberg]
+    end
+
+    R1 -- "INSERT INTO<br/>Tarefa 4" --> I1
+    R2 -- "INSERT INTO<br/>+ CAST data_pedido<br/>Tarefa 4" --> I2
+    R3 -- "CTAS<br/>+ valor_final<br/>Tarefa 6" --> A1
+    A1 -- "MERGE INTO<br/>(3 INS + 2 UPD)<br/>Tarefa 6" --> I2
+    I1 -. "JOIN id_cliente<br/>Tarefa 8" .- I2
+
+    classDef raw fill:#DBEAFE,stroke:#1E40AF,color:#1E3A8A
+    classDef iceMain fill:#D1FAE5,stroke:#065F46,color:#064E3B
+    classDef iceAux fill:#FED7AA,stroke:#9A3412,color:#7C2D12
+
+    class R1,R2,R3 raw
+    class I1,I2 iceMain
+    class A1 iceAux
+```
+
+**Legenda:**
+
+- 🟦 **RAW** — `clientes`, `pedidos`, `pedidos_delta`. Criadas pelo **Glue Crawler** na Tarefa 2 (formato CSV, externa). O Crawler usa o nome da pasta-pai (`s3://tf-aluno-<ACCOUNT_ID>/bruto/<entidade>/`) como nome da tabela. Tipos: tudo `STRING`/`INT`/`DOUBLE` por inferência. **Não vão para a entrega** — são intermediárias.
+- 🟩 **ICEBERG PRINCIPAIS** — `clientes_iceberg`, `pedidos_iceberg`. Criadas com `CREATE TABLE` + `TBLPROPERTIES('table_type'='iceberg', ...)` (Parquet + ZSTD) e populadas com `INSERT INTO ... SELECT` (Tarefa 4). `pedidos_iceberg` ainda recebe `ALTER TABLE ADD COLUMNS valor_final` + `UPDATE` (Tarefa 5) e o `MERGE INTO` dos deltas (Tarefa 6). **São essas duas tabelas que respondem a query executiva** da Tarefa 8.
+- 🟧 **ICEBERG AUXILIAR** — `pedidos_delta_iceberg`. Criada via CTAS na Tarefa 6 só para alimentar o `MERGE INTO`. **Pode ser dropada após o MERGE** — não entra em consultas analíticas.
+
+### Detalhe de cada tabela (colunas)
 
 ```mermaid
 erDiagram
-    clientes {
-        string id_cliente "STRING (origem CSV)"
-        string nome
-        string sobrenome
-        int ano_nascimento "INT (1950..2005)"
-        string cidade
-        string estado
-        string segmento
-    }
-    pedidos {
-        string id_pedido "STRING"
-        string id_cliente "FK"
-        string data_pedido "STRING (vai virar DATE)"
-        string categoria_produto
-        bigint quantidade
-        double preco_unitario
-        double desconto
-        double frete
-    }
-    pedidos_delta {
-        string id_pedido "3 INSERTs + 2 UPDATEs"
-        string id_cliente "FK"
-        string data_pedido "STRING"
-        string categoria_produto
-        bigint quantidade
-        double preco_unitario
-        double desconto
-        double frete
-    }
-
     clientes_iceberg {
-        string id_cliente PK "ICEBERG Parquet+ZSTD"
+        string id_cliente PK
         string nome
         string sobrenome
         int ano_nascimento
@@ -109,7 +124,7 @@ erDiagram
         string segmento
     }
     pedidos_iceberg {
-        string id_pedido PK "ICEBERG"
+        string id_pedido PK
         string id_cliente FK
         date data_pedido "convertido na CTAS"
         string categoria_produto
@@ -117,34 +132,12 @@ erDiagram
         double preco_unitario
         double desconto
         double frete
-        double valor_final "ALTER + UPDATE qtd preco 1-desc + frete"
+        double valor_final "ALTER+UPDATE Tarefa 5"
     }
-    pedidos_delta_iceberg {
-        string id_pedido PK "ICEBERG (CTAS intermediario)"
-        string id_cliente FK
-        date data_pedido
-        string categoria_produto
-        bigint quantidade
-        double preco_unitario
-        double desconto
-        double frete
-        double valor_final "calculado na CTAS"
-    }
-
-    clientes ||--|| clientes_iceberg : "INSERT INTO (Tarefa 4)"
-    pedidos ||--|| pedidos_iceberg : "INSERT INTO (Tarefa 4)"
-    pedidos_delta ||--|| pedidos_delta_iceberg : "CTAS (Tarefa 6)"
-    pedidos_delta_iceberg }o--|| pedidos_iceberg : "MERGE INTO (Tarefa 6)"
     clientes_iceberg ||--o{ pedidos_iceberg : "JOIN id_cliente (Tarefa 8)"
 ```
 
-Como ler o diagrama:
-
-- **Tabelas raw** (`clientes`, `pedidos`, `pedidos_delta`) são criadas pelo Glue Crawler na **Tarefa 2** — apontam para os CSVs em `s3://tf-aluno-<ACCOUNT_ID>/bruto/<entidade>/` e refletem o conteúdo bruto do CSV. O Crawler usa o nome da pasta-pai como nome da tabela (sem sufixo `_raw`). Tipos textuais ficam como `STRING`; `ano_nascimento` e numéricos viram `INT`/`DOUBLE` por inferência.
-- **Tabelas `*_iceberg`** são criadas via `CREATE TABLE` + `INSERT` (Tarefa 3 e 4) ou via CTAS (Tarefa 6), em formato Iceberg + Parquet + ZSTD, com `LOCATION` em `s3://tf-aluno-<ACCOUNT_ID>/iceberg/<entidade>/`.
-- A coluna `valor_final` em `pedidos_iceberg` é adicionada via `ALTER TABLE ADD COLUMNS` (operação barata, só altera metadado) e populada via `UPDATE` na **Tarefa 5**.
-- O `MERGE INTO` da **Tarefa 6** aplica os 5 deltas (3 INSERTs + 2 UPDATEs) atomicamente em `pedidos_iceberg`, gerando um único snapshot novo.
-- Na **Tarefa 8**, o `JOIN` entre `clientes_iceberg` e `pedidos_iceberg` produz o top 5 clientes por receita líquida — entregável final para a Marina.
+As colunas das 3 tabelas raw e da auxiliar são iguais às de `pedidos_iceberg` (a auxiliar herda colunas via CTAS), apenas com `data_pedido` ainda como `STRING` nas raws.
 
 ## Mapa do trabalho
 
